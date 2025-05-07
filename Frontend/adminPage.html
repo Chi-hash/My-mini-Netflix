@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Movie</title>
+</head>
+<body>
+    <h2>Upload movies here:</h2>
+    <form id="uploadform" enctype="multipart/form-data" method="POST">
+        <input type="text" name="title" placeholder="Movie Title" required><br><br>
+        <input type="text" name="description" placeholder="Movie Description" required><br><br>
+
+        <label for="thumbnail">Thumbnail (File or URL): </label> <br>
+        <input type="file" name="thumbnail" id="thumbnail" accept="image/*"><br><br>
+        <input type="text" name="thumbnailURL" placeholder="image URL"><br><br>
+
+        <label for="video">Video (File or URL):</label> <br>
+        <input type="file" name="video" id="video" accept="video/*"><br><br>
+        <input type="text" name="videoURL" placeholder="video URL"><br><br>
+
+        <button type="submit">Upload</button>
+        <p class="message"></p>
+    </form>
+<script>
+    const form = document.getElementById('uploadform');
+    const message = document.querySelector('.message');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+
+        const formData = new FormData(form);
+        
+        try {
+            // Show loading message
+            message.innerText = "Uploading...";
+            
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Server responded with an error');
+            }
+
+            const result = await response.json();
+            message.innerText = result.message || "Upload successful";
+            form.reset(); // Reset the form after successful upload
+        } catch (error) {
+            console.error('Error:', error);
+            message.innerText = "Upload failed: " + error.message;
+        }
+    });
+</script>
+</body>
+</html>
