@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import multer from "multer";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -40,9 +40,6 @@ function createMovieFolderName(title) {
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        // We'll create a movie-specific folder for each upload
-        // Since we don't have the title yet when this function runs,
-        // we'll store in a temporary location first
         const tempDir = path.join(UPLOADS_BASE_DIR, "temp");
         if (!fs.existsSync(tempDir)) {
             fs.mkdirSync(tempDir);
@@ -50,7 +47,6 @@ const storage = multer.diskStorage({
         cb(null, tempDir);
     },
     filename: function(req, file, cb) {
-        // Create a more descriptive filename based on file type
         const fileType = file.fieldname; // "thumbnail" or "video"
         const fileExt = path.extname(file.originalname);
         const baseName = path.basename(file.originalname, fileExt);
@@ -61,7 +57,7 @@ const storage = multer.diskStorage({
     }
 });
 
-// Create multer instance
+// multer instance
 const upload = multer({ 
     storage: storage,
     fileFilter: function(req, file, cb) {
@@ -84,7 +80,7 @@ if (!fs.existsSync(moviesFile)) {
 app.post("/upload", (req, res) => {
     console.log("Received upload request");
     
-    // Use multer to process the uploaded files
+    // multer to process the uploaded files
     upload(req, res, function(err) {
         if (err instanceof multer.MulterError) {
             console.error("Multer error:", err);
@@ -220,6 +216,10 @@ app.post("/upload", (req, res) => {
 });
 
 // Add route to get all movies
+
+app.get("/", (req, res) => {
+    res.sendFile("C:\\Users\\CHIOMA\\Desktop\\VSCODE PROGRAMS\\MY NETFLIX\\Frontend\\adminPage.html");
+});
 app.get("/api/movies", (req, res) => {
     try {
         const data = fs.readFileSync(moviesFile, 'utf8');
@@ -250,11 +250,6 @@ app.get("/api/movies/:id", (req, res) => {
 });
 
 // Add a route to check if server is running
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'adminPage.html'));
-});
-
-
 app.get("/api/status", (req, res) => {
     res.json({ status: "ok", message: "Server is running" });
 });
